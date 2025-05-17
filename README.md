@@ -70,6 +70,11 @@
 
 <img src="./docs/guard.gif" alt="guard" width="600px">
 
+#### 포커싱
+
+<img src="./docs/enemyfocusing.gif" alt="enemyfocusing" width="600px">
+<br/>
+포커싱 하는 몬스터로 시선을 고정. 마우스를 움직여 포커싱 대상을 변경할 수 있습니다.
 
 ### 몬스터
 <img src="./docs/enemies.png" alt="enemies" width="600px">
