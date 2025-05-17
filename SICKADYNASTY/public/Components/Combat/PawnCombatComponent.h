@@ -7,6 +7,13 @@
 #include "GameplayTagContainer.h"
 #include "PawnCombatComponent.generated.h"
 
+
+UENUM(BlueprintType)
+enum class EToggleDamageType : uint8
+{
+	LeftHand,
+	RightHand,
+};
 /**
  * 
  */
@@ -16,11 +23,16 @@ class SICKADYNASTY_API UPawnCombatComponent : public UPawnExtensionComponentBase
 	GENERATED_BODY()
 
 
+protected:
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	virtual void ToggleBodyCollisionBoxCollision(bool bShouldEnable, EToggleDamageType ToggleDamageType);
+
 
 public:
 	UPawnCombatComponent();
 
 	virtual void OnHitTargetActor(AActor* HitActor);
+
 
 	void DelegateBindingToActor();
 };

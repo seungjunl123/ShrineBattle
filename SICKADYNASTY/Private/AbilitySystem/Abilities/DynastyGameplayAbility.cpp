@@ -4,6 +4,8 @@
 #include "AbilitySystem/Abilities/DynastyGameplayAbility.h"
 #include "AbilitySystem/DynastyAbilitySystemComponent.h"
 #include "Components/Combat/PawnCombatComponent.h"
+#include "DynastyFunctionLibrary.h" 
+#include "KwangGameplayTags.h"
 #include "DynastyTypes/DynastyEnumTypes.h"
 #include "AbilitySystemBlueprintLibrary.h"
 
@@ -67,4 +69,39 @@ FActiveGameplayEffectHandle UDynastyGameplayAbility::BP_ApplyEffectSpecHandleToT
     OutSuccessType = ActiveGameplayEffectHandle.WasSuccessfullyApplied() ? EDynastySuccessType::Successful : EDynastySuccessType::Failed;
 
     return ActiveGameplayEffectHandle;
+}
+
+void UDynastyGameplayAbility::ApplyGameplayEffectSpecHandleToHitResults(const FGameplayEffectSpecHandle& InSpecHandle, const TArray<FHitResult>& InHitResults)
+{
+    if (InHitResults.IsEmpty())
+    {
+        return;
+    }
+
+    APawn* OwningPawn = CastChecked<APawn>(GetAvatarActorFromActorInfo());
+
+    for (const FHitResult& Hit : InHitResults)
+    {
+        if (APawn* HitPawn = Cast<APawn>(Hit.GetActor()))
+        {
+            if (UDynastyFunctionLibrary::IsTargetPawnHostile(OwningPawn, HitPawn))
+            {
+                UE_LOG(LogTemp, Display, TEXT("Damage to: %s"), *Hit.GetActor()->GetActorNameOrLabel());
+                FActiveGameplayEffectHandle ActiveGameplayEffectHandle = NativeApplyEffectSpecHandleToTarget(HitPawn, InSpecHandle);
+
+                if (ActiveGameplayEffectHandle.WasSuccessfullyApplied())
+                {
+                    FGameplayEventData Data;
+                    Data.Instigator = OwningPawn;
+                    Data.Target = HitPawn;
+
+                    UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
+                        HitPawn,
+                        KwangGameplayTags::Shared_Event_HitReact,
+                        Data
+                    );
+                }
+            }
+        }
+    }
 }

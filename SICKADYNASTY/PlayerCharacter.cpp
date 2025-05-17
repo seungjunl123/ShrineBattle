@@ -17,6 +17,7 @@
 #include "ComboActionData.h"
 #include "Components/Input/KwangInputComponent.h"
 #include "KwangGameplayTags.h"
+#include "GameMode/DynastyGameModeBase.h"
 #include "DataAsset/StartUpData/DataAsset_StartUpBase.h"
 #include "AbilitySystem/DynastyAbilitySystemComponent.h"
 #include "Components/Combat/KwangCombatComponent.h"
@@ -100,6 +101,32 @@ void APlayerCharacter::PossessedBy(AController* NewController)
 	{
 		if(UDataAsset_StartUpBase* LoadedData = CharacterStartUpData.LoadSynchronous())
 		{
+			int32 AbilityApplyLevel = 1;
+
+			if (ADynastyGameModeBase* BaseGameMode = GetWorld()->GetAuthGameMode<ADynastyGameModeBase>())
+			{
+				switch (BaseGameMode->GetCurrentGameDifficulty())
+				{
+				case EDynastyGameDifficulty::Easy:
+					AbilityApplyLevel = 4;
+					break;
+
+				case EDynastyGameDifficulty::Normal:
+					AbilityApplyLevel = 3;
+					break;
+
+				case EDynastyGameDifficulty::Hard:
+					AbilityApplyLevel = 2;
+					break;
+
+				case EDynastyGameDifficulty::VeryHard:
+					AbilityApplyLevel = 1;
+					break;
+
+				default:
+					break;
+				}
+			}
 			LoadedData->GiveToAbilitySystemComponent(KwangAbilitySystemComponent);
 		}
 	}
@@ -126,6 +153,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	KwangInputComponent->BindNativeInputAction(InputConfigDataAsset,KwangGameplayTags::InputTag_Look,ETriggerEvent::Triggered,this,&ThisClass::Look);
 	KwangInputComponent->BindNativeInputAction(InputConfigDataAsset, KwangGameplayTags::InputTag_SwitchTarget, ETriggerEvent::Triggered, this, &ThisClass::Input_SwitchargetTriggered);
 	KwangInputComponent->BindNativeInputAction(InputConfigDataAsset, KwangGameplayTags::InputTag_SwitchTarget, ETriggerEvent::Completed, this, &ThisClass::Input_SwitchargetCompleted);
+	KwangInputComponent->BindNativeInputAction(InputConfigDataAsset, KwangGameplayTags::InputTag_Pickup_Item, ETriggerEvent::Started, this, &ThisClass::Input_PickUpStonesStarted);
+
 
 	KwangInputComponent->BindAbilityInputAction(InputConfigDataAsset,this, &ThisClass::Input_AbilityInputPressed, &ThisClass::Input_AbilityInputReleased);
 }
@@ -189,6 +218,17 @@ void APlayerCharacter::Input_SwitchargetCompleted(const FInputActionValue& Input
 void APlayerCharacter::Roll(const FInputActionValue &Value)
 {
 	
+}
+
+void APlayerCharacter::Input_PickUpStonesStarted(const FInputActionValue& InputActionValue)
+{
+	FGameplayEventData Data;
+
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
+		this,
+		KwangGameplayTags::Player_Event_ConsumeStones,
+		Data
+	);
 }
 
 void APlayerCharacter::Input_AbilityInputPressed(FGameplayTag InputTag)

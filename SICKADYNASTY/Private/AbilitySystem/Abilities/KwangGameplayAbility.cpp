@@ -55,3 +55,8 @@ FGameplayEffectSpecHandle UKwangGameplayAbility::MakeDamageEffectSpecHandle(TSub
 
     return EffectSpecHandle;
 }
+
+UPlayerUIComponent* UKwangGameplayAbility::GetPlayerUiComponentFromActorInfo()
+{
+    return GetPlayerCharacterFromActorInfo()->GetPlayerUiComponent();
+}

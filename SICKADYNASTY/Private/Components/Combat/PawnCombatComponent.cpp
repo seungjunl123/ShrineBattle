@@ -14,6 +14,10 @@ void UPawnCombatComponent::DelegateBindingToActor()
 	}
 }
 
+void UPawnCombatComponent::ToggleBodyCollisionBoxCollision(bool bShouldEnable, EToggleDamageType ToggleDamageType)
+{
+}
+
 UPawnCombatComponent::UPawnCombatComponent()
 {
 	DelegateBindingToActor();

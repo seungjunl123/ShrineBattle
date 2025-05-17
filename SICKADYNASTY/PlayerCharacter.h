@@ -73,6 +73,7 @@ protected:
 	void Input_SwitchargetCompleted(const FInputActionValue& InputActionValue);
 
 	void Roll(const FInputActionValue& Value);
+	void Input_PickUpStonesStarted(const FInputActionValue& InputActionValue);
 
 	void Input_AbilityInputPressed(FGameplayTag InputTag);
 	void Input_AbilityInputReleased(FGameplayTag InputTag);

@@ -2,6 +2,7 @@
 
 
 #include "Character/EnemyCharacter.h"
+#include "Components/BoxComponent.h"
 #include "Components/UI/EnemyUIComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Widgets/DynastyWidgetBase.h"
@@ -9,6 +10,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "DataAsset/StartUpData/DataAsset_EnemyStartUpBase.h"
 #include "DynastyFunctionLibrary.h"
+#include "GameMode/DynastyGameModeBase.h"
 #include "Engine/AssetManager.h"
 
 
@@ -33,6 +35,16 @@ AEnemyCharacter::AEnemyCharacter()
 
 	EnemyHealthWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Enemy Health Widget Component"));
 	EnemyHealthWidgetComponent->SetupAttachment(GetMesh());
+
+	LeftHandCollisionBox = CreateDefaultSubobject<UBoxComponent>("LeftHandCollision");
+	LeftHandCollisionBox->SetupAttachment(GetMesh());
+	LeftHandCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 안쓰는 적들을 위해 NoCollision으로 설정
+	LeftHandCollisionBox->OnComponentBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnBodyCollisionBoxBeginOverlap);
+
+	RightHandCollisionBox = CreateDefaultSubobject<UBoxComponent>("RightHandCollisionBox");
+	RightHandCollisionBox->SetupAttachment(GetMesh());
+	RightHandCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RightHandCollisionBox->OnComponentBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnBodyCollisionBoxBeginOverlap);
 }
 
 UPawnCombatComponent* AEnemyCharacter::GetPawnCombatComponent() const
@@ -59,6 +71,39 @@ void AEnemyCharacter::PossessedBy(AController* NewController)
 	InitEnemyStartupData();
 }
 
+
+#if WITH_EDITOR
+void AEnemyCharacter::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, LeftHandCollisionBoxAttachBoneName))
+	{
+		LeftHandCollisionBox->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, LeftHandCollisionBoxAttachBoneName);
+	}
+	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, RightHandCollisionBoxAttachBoneName))
+	{
+		RightHandCollisionBox->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RightHandCollisionBoxAttachBoneName);
+	}
+}
+#endif
+
+void AEnemyCharacter::OnBodyCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (APawn* HitPawn = Cast<APawn>(OtherActor))
+	{
+		if (UDynastyFunctionLibrary::IsTargetPawnHostile(this, HitPawn))
+		{
+			if (HittedActors.Contains(HitPawn))
+			{
+				return;
+			}
+			HittedActors.Add(HitPawn);
+			EnemyCombatComponent->OnHitTargetActor(HitPawn);
+		}
+	}
+}
+
 void AEnemyCharacter::InitEnemyStartupData()
 {
 	if (CharacterStartUpData.IsNull())
@@ -66,14 +111,41 @@ void AEnemyCharacter::InitEnemyStartupData()
 		return;
 	}
 
+	int32 AbilityApplyLevel = 1;
+
+	if (ADynastyGameModeBase* BaseGameMode = GetWorld()->GetAuthGameMode<ADynastyGameModeBase>())
+	{
+		switch (BaseGameMode->GetCurrentGameDifficulty())
+		{
+		case EDynastyGameDifficulty::Easy:
+			AbilityApplyLevel = 1;
+			break;
+
+		case EDynastyGameDifficulty::Normal:
+			AbilityApplyLevel = 2;
+			break;
+
+		case EDynastyGameDifficulty::Hard:
+			AbilityApplyLevel = 3;
+			break;
+
+		case EDynastyGameDifficulty::VeryHard:
+			AbilityApplyLevel = 4;
+			break;
+
+		default:
+			break;
+		}
+	}
+
 	UAssetManager::GetStreamableManager().RequestAsyncLoad(
 		CharacterStartUpData.ToSoftObjectPath(),
 		FStreamableDelegate::CreateLambda(
-			[this]()
+			[this, AbilityApplyLevel]()
 			{
 				if (UDataAsset_StartUpBase* LoadedData = CharacterStartUpData.Get())
 				{
-					LoadedData->GiveToAbilitySystemComponent(KwangAbilitySystemComponent);
+					LoadedData->GiveToAbilitySystemComponent(KwangAbilitySystemComponent, AbilityApplyLevel);
 				}
 
 			}

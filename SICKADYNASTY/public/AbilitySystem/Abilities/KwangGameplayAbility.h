@@ -10,6 +10,7 @@
 class APlayerCharacter;
 class ADynastyPlayerController;
 class UKwangCombatComponent;
+class UPlayerUIComponent;
 /**
  * 
  */
@@ -27,7 +28,8 @@ public:
 	UKwangCombatComponent* GetKwangCombatComponentFromActorInfo();
 	UFUNCTION(BlueprintPure, Category="Ability")
 	FGameplayEffectSpecHandle MakeDamageEffectSpecHandle(TSubclassOf<UGameplayEffect> EffectClass, float InBaseDamage, FGameplayTag InCurrentAttackTypeTag, int32 InCurrentCombocount);
-
+	UFUNCTION(BlueprintPure, Category = "Ability")
+	UPlayerUIComponent* GetPlayerUiComponentFromActorInfo();
 private:
 	TWeakObjectPtr<APlayerCharacter> ChachedPlayerCharacter;
 	TWeakObjectPtr<ADynastyPlayerController> ChachedDynastyPlayerController;

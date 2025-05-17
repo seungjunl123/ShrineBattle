@@ -68,10 +68,9 @@ void ADynastyAIController::OnEnemyPerceptionUpdate(AActor* Actor, FAIStimulus St
 {
 	if (UBlackboardComponent* BlackboardComponent = GetBlackboardComponent())
 	{
-
 		if (!BlackboardComponent->GetValueAsObject(FName("TargetActor")))
 		{
-
+			UE_LOG(LogTemp, Display, TEXT("TargetActor is %s"),*Actor->GetActorNameOrLabel());
 			if (Stimulus.WasSuccessfullySensed() && Actor)
 			{
 				BlackboardComponent->SetValueAsObject(FName("TargetActor"), Actor);

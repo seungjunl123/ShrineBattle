@@ -47,6 +47,8 @@ void UAttackComboAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 void UAttackComboAbility::CancelAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateCancelAbility)
 {
     Super::CancelAbility(Handle, ActorInfo, ActivationInfo, bReplicateCancelAbility);
+
+
 }
 
 void UAttackComboAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
@@ -56,9 +58,9 @@ void UAttackComboAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, co
     APlayerCharacter* TargetCharacter = Cast<APlayerCharacter>(ActorInfo->AvatarActor.Get());
     if (!TargetCharacter) return;
 
-
-
     TargetCharacter->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+
+
     UDynastyFunctionLibrary::RemoveGameplayTagToActorIfFound(ActorInfo->AvatarActor.Get(), KwangGameplayTags::Player_State_HeavyAttack);
 
     CurrentComboCount = 0;
@@ -137,12 +139,6 @@ void UAttackComboAbility::ComboCheck()
     {
         CurrentComboCount = FMath::Clamp(CurrentComboCount + 1, 1, AttackComboData->MaxComboCount);
         APlayerCharacter* TargetCharacter = Cast<APlayerCharacter>(CurrentActorInfo->AvatarActor.Get());
-        if (CurrentComboCount==AttackComboData->MaxComboCount-1)
-        {
-            UDynastyFunctionLibrary::AddGameplayTagToActorIfNone(CurrentActorInfo->AvatarActor.Get(), KwangGameplayTags::Player_State_HeavyAttack);
-        }
-
-
         
         if (!TargetCharacter) return;
         UAnimInstance* AnimInstance = TargetCharacter->GetMesh()->GetAnimInstance();

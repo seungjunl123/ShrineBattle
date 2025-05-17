@@ -16,6 +16,7 @@ void UDynastyAbilitySystemComponent::OnAbilityInputPressed(const FGameplayTag &I
     {
         if(!AbilitySpec.DynamicAbilityTags.HasTagExact(InputTag)) continue;
 
+
 		if (InputTag.MatchesTag(KwangGameplayTags::InputTag_Toggleable))
 		{
 			// 토글 가능 태그 일 경우 누를 때마다 온 오프가 되어야 한다.
