@@ -44,7 +44,6 @@
 
 <br/>
 <img src="./docs/BasicAttack.gif" alt="basic attack" width="600px">
-
 <br/>
 <일반 공격>
 <p>
@@ -63,15 +62,16 @@
 <p>
 
 #### 아이템 소비
-
 <img src="./docs/stone.gif" alt="stone" width="600px">
+<br/>
+몬스터 처치 시 아이템이 드랍됩니다. 플레이어가 아이템 주변으로 가면 소비 UI가 활성화되며, F 버튼으로 아이템을 소비하여 체력 또는 마나를 회복합니다.
 
 #### 방어
-
 <img src="./docs/guard.gif" alt="guard" width="600px">
+<br/>
+근접 몬스터나 원거리 몬스터의 공격을 방어합니다.
 
 #### 포커싱
-
 <img src="./docs/enemyfocusing.gif" alt="enemyfocusing" width="600px">
 <br/>
 포커싱 하는 몬스터로 시선을 고정. 마우스를 움직여 포커싱 대상을 변경할 수 있습니다.
